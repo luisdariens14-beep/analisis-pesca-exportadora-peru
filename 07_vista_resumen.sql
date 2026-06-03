@@ -1,0 +1,7 @@
+SELECT TOP (1000) [anio]
+      ,[departamento]
+      ,[especie]
+      ,[tamano_empresa]
+      ,[total_exportado_usd]
+      ,[total_trabajadores]
+  FROM [PescaExportadora].[dbo].[vista_resumen_exportaciones]
