@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard - Análisis Pesca Exportadora Perú 2019-2024</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 24px; }
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi { background: #fff; border-radius: 10px; padding: 16px 20px; border: 1px solid #e0e0e0; }
+  .kpi-label { font-size: 12px; color: #888; margin-bottom: 6px; }
+  .kpi-value { font-size: 26px; font-weight: 700; }
+  .kpi-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+  .blue { color: #185FA5; }
+  .green { color: #1D9E75; }
+  .red { color: #E24B4A; }
+  .amber { color: #BA7517; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .chart-card { background: #fff; border-radius: 10px; padding: 20px; border: 1px solid #e0e0e0; }
+  .chart-title { font-size: 13px; font-weight: 600; color: #333; margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: #999; margin-bottom: 16px; }
+  .chart-full { background: #fff; border-radius: 10px; padding: 20px; border: 1px solid #e0e0e0; margin-bottom: 20px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-size: 12px; color: #555; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .dot { width: 10px; height: 10px; border-radius: 2px; }
+  footer { font-size: 11px; color: #aaa; text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Análisis de Exportaciones Pesqueras del Perú</h1>
+<p class="subtitle">Período 2019–2024 | Fuente: SUNAT / PRODUCE | Herramientas: SQL Server · HTML</p>
+
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="kpi-label">Total exportado</div>
+    <div class="kpi-value blue">$20.4B</div>
+    <div class="kpi-sub">USD acumulado 2019-2024</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Concentración Lima + Piura</div>
+    <div class="kpi-value green">96%</div>
+    <div class="kpi-sub">Del total nacional</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Caída máxima</div>
+    <div class="kpi-value red">-29%</div>
+    <div class="kpi-sub">2023 por El Niño</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Recuperación 2024</div>
+    <div class="kpi-value amber">+26%</div>
+    <div class="kpi-sub">Respecto a 2023</div>
+  </div>
+</div>
+
+<div class="chart-full">
+  <div class="chart-title">Evolución anual de exportaciones (miles de USD)</div>
+  <div class="chart-sub">Impacto del COVID-19 (2020) y Fenómeno El Niño (2023)</div>
+  <div style="position:relative; width:100%; height:220px;">
+    <canvas id="lineChart" role="img" aria-label="Evolución anual exportaciones pesqueras Perú 2019-2024">2019: 3.4B, 2020: 2.8B, 2021: 3.8B, 2022: 4.0B, 2023: 2.8B, 2024: 3.6B</canvas>
+  </div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="chart-title">Exportaciones por departamento (USD)</div>
+    <div class="chart-sub">Lima y Piura dominan el 96% del total</div>
+    <div style="position:relative; width:100%; height:280px;">
+      <canvas id="deptChart" role="img" aria-label="Ranking exportaciones por departamento">Lima: 81%, Piura: 15%, resto: 4%</canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Top 5 especies exportadas (USD)</div>
+    <div class="chart-sub">Harina de pescado lidera ampliamente</div>
+    <div style="position:relative; width:100%; height:280px;">
+      <canvas id="especieChart" role="img" aria-label="Top 5 especies exportadas por valor">Harina de pescado: 8.6B, Pota: 3.6B, Aceite crudo: 1.6B, Langostino: 1.4B, Aceite refinado: 0.9B</canvas>
+    </div>
+  </div>
+</div>
+
+<div class="charts-grid">
+  <div class="chart-card">
+    <div class="chart-title">Exportaciones por tamaño de empresa</div>
+    <div class="chart-sub">La gran empresa concentra casi todo el valor</div>
+    <div class="legend">
+      <span><span class="dot" style="background:#185FA5"></span>Gran empresa</span>
+      <span><span class="dot" style="background:#1D9E75"></span>Pequeña</span>
+      <span><span class="dot" style="background:#BA7517"></span>Mediana</span>
+      <span><span class="dot" style="background:#E24B4A"></span>Micro</span>
+    </div>
+    <div style="position:relative; width:100%; height:220px;">
+      <canvas id="tamanoChart" role="img" aria-label="Exportaciones por tamaño empresa">Gran empresa: 97%, Pequeña: 1.7%, Mediana: 0.8%, Micro: 0.5%</canvas>
+    </div>
+  </div>
+  <div class="chart-card">
+    <div class="chart-title">Tasa de crecimiento anual (%)</div>
+    <div class="chart-sub">Alta volatilidad = alto riesgo sectorial</div>
+    <div style="position:relative; width:100%; height:220px;">
+      <canvas id="crecChart" role="img" aria-label="Tasa de crecimiento anual exportaciones">2020: -19%, 2021: +35%, 2022: +6%, 2023: -29%, 2024: +26%</canvas>
+    </div>
+  </div>
+</div>
+
+<footer>Dashboard creado con HTML + Chart.js | Proyecto de portafolio — Luis Darien Cabrera Coarita</footer>
+
+<script>
+const azul = '#185FA5';
+const verde = '#1D9E75';
+const rojo = '#E24B4A';
+const amber = '#BA7517';
+const gris = '#888780';
+
+new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels: ['2019','2020','2021','2022','2023','2024'],
+    datasets: [{
+      label: 'Exportaciones (miles USD)',
+      data: [3441492, 2788342, 3773271, 3983701, 2825671, 3562606],
+      borderColor: azul,
+      backgroundColor: '#E6F1FB',
+      fill: true,
+      tension: 0.3,
+      pointBackgroundColor: azul,
+      pointRadius: 5
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => '$' + (v/1000000).toFixed(1) + 'B' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('deptChart'), {
+  type: 'bar',
+  data: {
+    labels: ['LIMA','PIURA','TUMBES','ICA','CALLAO','AREQUIPA','ANCASH'],
+    datasets: [{
+      data: [16575055, 2978848, 249801, 216094, 165912, 87424, 57272],
+      backgroundColor: azul,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { callback: v => '$' + (v/1000000).toFixed(0) + 'M' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('especieChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Harina de\npescado','Pota','Aceite\ncrudo','Langostino','Aceite\nrefinado'],
+    datasets: [{
+      data: [8624602, 3622828, 1648305, 1386987, 917040],
+      backgroundColor: verde,
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => '$' + (v/1000000).toFixed(0) + 'M' } }
+    }
+  }
+});
+
+new Chart(document.getElementById('tamanoChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Gran empresa','Pequeña','Mediana','Micro'],
+    datasets: [{
+      data: [19764927, 345455, 155429, 109274],
+      backgroundColor: [azul, verde, amber, rojo],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } }
+  }
+});
+
+new Chart(document.getElementById('crecChart'), {
+  type: 'bar',
+  data: {
+    labels: ['2020','2021','2022','2023','2024'],
+    datasets: [{
+      data: [-18.98, 35.32, 5.58, -29.07, 26.08],
+      backgroundColor: [-18.98, 35.32, 5.58, -29.07, 26.08].map(v => v >= 0 ? verde : rojo),
+      borderRadius: 4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { ticks: { callback: v => v + '%' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
