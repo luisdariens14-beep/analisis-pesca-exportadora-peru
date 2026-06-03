@@ -1,5 +1,0 @@
-CREATE TABLE PARTICIPANTE (
-id_participante INT PRIMARY KEY,
-nombre VARCHAR(50),
-pais VARCHAR(50)
-);
